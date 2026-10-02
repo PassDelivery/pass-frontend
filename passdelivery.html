@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PassDelivery</title>
+<style>
+:root{--bg:#eef1f2;--ink:#17222b;--mute:#5f6e78;--line:#d3dadd;--card:#fff;--acc:#0f5c5a;--accInk:#fff;--err:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#10171c;--ink:#e6ecef;--mute:#8d9ba5;--line:#26323a;--card:#182128;--acc:#4fb3ae;--accInk:#08201f;--err:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:560px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
+h1{margin:0;font-size:28px;letter-spacing:-.02em}
+h1 b{color:var(--acc)}
+h2{font-size:18px;margin:0 0 12px}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+label{display:block;font-size:14px;color:var(--mute);margin:10px 0 4px}
+input,select{width:100%;padding:10px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button{font:inherit;padding:10px 16px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+button.primary{background:var(--acc);color:var(--accInk);border-color:var(--acc);font-weight:600}
+button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.msg{min-height:20px;font-size:14px;margin-top:10px}.msg.err{color:var(--err)}.msg.ok{color:var(--acc)}
+.addr{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.addr:first-of-type{border-top:0}
+.addr small{color:var(--mute);display:block}
+.badge{font-size:12px;border:1px solid var(--acc);color:var(--acc);border-radius:99px;padding:1px 8px;margin-left:6px}
+.empty{color:var(--mute)}
+details summary{cursor:pointer;color:var(--mute);font-size:14px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Pass<b>Delivery</b></h1>
+  <button id="logout" hidden>Выйти</button>
+</header>
+
+<!-- ============ AUTH ============ -->
+<section id="auth">
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-login" aria-selected="true">Вход</button>
+    <button role="tab" id="tab-reg" aria-selected="false">Регистрация</button>
+  </div>
+  <div id="reg-only" hidden>
+    <label for="f-name">Имя</label><input id="f-name" autocomplete="name">
+    <label for="f-phone">Телефон</label><input id="f-phone" type="tel" autocomplete="tel">
+    <label for="f-role">Роль</label>
+    <select id="f-role">
+      <option value="customer">Клиент</option>
+      <option value="restaurant_owner">Владелец ресторана</option>
+      <option value="courier">Курьер</option>
+    </select>
+  </div>
+  <label for="f-email">Email</label><input id="f-email" type="email" autocomplete="email">
+  <label for="f-pass">Пароль</label><input id="f-pass" type="password" minlength="8" autocomplete="current-password">
+  <div class="actions"><button class="primary" id="auth-submit">Войти</button></div>
+  <div class="msg" id="auth-msg" role="status"></div>
+  <details>
+    <summary>Адрес API</summary>
+    <label for="f-api">Base URL</label><input id="f-api">
+  </details>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" hidden>
+  <section>
+    <h2>Профиль</h2>
+    <div class="msg" id="role-line" style="margin:0 0 6px"></div>
+    <label for="p-name">Имя</label><input id="p-name">
+    <label for="p-email">Email</label><input id="p-email" type="email">
+    <label for="p-phone">Телефон</label><input id="p-phone" type="tel">
+    <div class="actions"><button class="primary" id="profile-save">Сохранить профиль</button></div>
+    <div class="msg" id="profile-msg" role="status"></div>
+  </section>
+
+  <section>
+    <h2>Адреса</h2>
+    <div id="addr-list"><p class="empty">Загрузка…</p></div>
+    <div class="msg" id="addr-msg" role="status"></div>
+  </section>
+
+  <section>
+    <h2>Новый адрес</h2>
+    <div class="row">
+      <div><label for="a-city">Город *</label><input id="a-city"></div>
+      <div><label for="a-street">Улица *</label><input id="a-street"></div>
+    </div>
+    <div class="row">
+      <div><label for="a-house">Дом *</label><input id="a-house"></div>
+      <div><label for="a-apt">Квартира</label><input id="a-apt"></div>
+    </div>
+    <label for="a-comment">Комментарий курьеру</label><input id="a-comment">
+    <label style="display:flex;gap:8px;align-items:center;color:var(--ink)">
+      <input type="checkbox" id="a-default" style="width:auto"> Основной адрес
+    </label>
+    <div class="actions"><button class="primary" id="addr-add">Добавить адрес</button></div>
+    <div class="msg" id="addr-add-msg" role="status"></div>
+  </section>
+</div>
+</main>
+
+<script>
+/* ===================== API-слой ===================== */
+const LS = { token: 'pass_token', api: 'pass_api' };
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} }
+};
+let API = store.get(LS.api) || 'http://localhost:5050';
+let token = store.get(LS.token);
+
+class ApiError extends Error {
+  constructor(status, body){ super(body?.message || body?.error || ('HTTP ' + status)); this.status = status; this.body = body; }
+}
+
+async function api(method, path, body){
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  let res;
+  try {
+    res = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  } catch {
+    throw new ApiError(0, { message: 'Нет связи с сервером ' + API + ' (проверьте, что бэкенд запущен и включён CORS)' });
+  }
+  if (res.status === 204) return null;
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    if (res.status === 401 && token && !path.startsWith('/auth/')) logout();
+    throw new ApiError(res.status, data);
+  }
+  return data;
+}
+
+// 7 ручек из контракта (PATCH /users/me/addresses/{id} пока нет на бэке)
+const Api = {
+  register: (b) => api('POST', '/auth/register', b),
+  login:    (b) => api('POST', '/auth/login', b),
+  me:       ()  => api('GET',  '/users/me'),
+  updateMe: (b) => api('PATCH','/users/me', b),
+  addresses:()  => api('GET',  '/users/me/addresses'),
+  addAddress:(b)=> api('POST', '/users/me/addresses', b),
+  delAddress:(id)=>api('DELETE','/users/me/addresses/' + id),
+  // updateAddress: (id,b) => api('PATCH','/users/me/addresses/' + id, b)  // TODO: когда появится на бэке
+};
+
+/* ===================== UI ===================== */
+const $ = (id) => document.getElementById(id);
+const roleNames = { customer:'Клиент', restaurant_owner:'Владелец ресторана', courier:'Курьер', admin:'Администратор' };
+let mode = 'login';
+
+function say(id, text, kind){ const el = $(id); el.textContent = text || ''; el.className = 'msg' + (kind ? ' ' + kind : ''); }
+function busy(btn, on){ btn.disabled = on; }
+
+function setMode(m){
+  mode = m;
+  $('tab-login').setAttribute('aria-selected', m === 'login');
+  $('tab-reg').setAttribute('aria-selected', m === 'register');
+  $('reg-only').hidden = m === 'login';
+  $('auth-submit').textContent = m === 'login' ? 'Войти' : 'Зарегистрироваться';
+  $('f-pass').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  say('auth-msg', '');
+}
+
+function showAuthed(on){
+  $('auth').hidden = on; $('app').hidden = !on; $('logout').hidden = !on;
+}
+
+function logout(){
+  token = null; store.del(LS.token);
+  showAuthed(false); say('auth-msg', '');
+}
+
+async function onAuth(){
+  const btn = $('auth-submit');
+  const email = $('f-email').value.trim(), password = $('f-pass').value;
+  if (!email || !password) return say('auth-msg', 'Введите email и пароль', 'err');
+  busy(btn, true); say('auth-msg', '');
+  try {
+    let res;
+    if (mode === 'login') {
+      res = await Api.login({ email, password });
+    } else {
+      const name = $('f-name').value.trim();
+      if (!name) { busy(btn,false); return say('auth-msg', 'Введите имя', 'err'); }
+      if (password.length < 8) { busy(btn,false); return say('auth-msg', 'Пароль — минимум 8 символов', 'err'); }
+      const payload = { email, password, name, role: $('f-role').value };
+      const phone = $('f-phone').value.trim(); if (phone) payload.phone = phone;
+      res = await Api.register(payload);
+    }
+    token = res.token; store.set(LS.token, token);
+    $('f-pass').value = '';
+    await enterApp(res);
+  } catch (e) {
+    say('auth-msg', e.status === 409 ? 'Этот email уже занят' : e.status === 401 ? 'Неверный email или пароль' : e.message, 'err');
+  } finally { busy(btn, false); }
+}
+
+function fillProfile(u){
+  $('role-line').textContent = 'Роль: ' + (roleNames[u.role] || u.role);
+  $('p-name').value = u.name || ''; $('p-email').value = u.email || ''; $('p-phone').value = u.phone || '';
+}
+
+async function enterApp(user){
+  showAuthed(true);
+  if (user) fillProfile(user);
+  try { fillProfile(await Api.me()); } catch (e) { if (token) say('profile-msg', e.message, 'err'); }
+  loadAddresses();
+}
+
+async function saveProfile(){
+  const btn = $('profile-save'); busy(btn, true); say('profile-msg', '');
+  try {
+    fillProfile(await Api.updateMe({ name: $('p-name').value.trim(), email: $('p-email').value.trim(), phone: $('p-phone').value.trim() }));
+    say('profile-msg', 'Профиль сохранён', 'ok');
+  } catch (e) { say('profile-msg', e.message, 'err'); }
+  finally { busy(btn, false); }
+}
+
+function addrLine(a){
+  return [a.city, 'ул. ' + a.street, 'д. ' + a.house, a.apartment ? 'кв. ' + a.apartment : null].filter(Boolean).join(', ');
+}
+
+function renderAddresses(list){
+  const box = $('addr-list'); box.textContent = '';
+  if (!list || !list.length) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'Адресов пока нет. Добавьте первый ниже.'; box.append(p); return; }
+  for (const a of list) {
+    const row = document.createElement('div'); row.className = 'addr';
+    const info = document.createElement('div');
+    const t = document.createElement('div'); t.textContent = addrLine(a);
+    if (a.is_default) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = 'основной'; t.append(b); }
+    info.append(t);
+    if (a.comment) { const s = document.createElement('small'); s.textContent = a.comment; info.append(s); }
+    const acts = document.createElement('div'); acts.style.cssText = 'display:flex;gap:6px;align-items:start';
+    const edit = document.createElement('button'); edit.textContent = 'Изменить'; edit.disabled = true; edit.title = 'Бэкенд пока не поддерживает';
+    const del = document.createElement('button'); del.textContent = 'Удалить';
+    del.onclick = () => removeAddress(a.id, del);
+    acts.append(edit, del);
+    row.append(info, acts); box.append(row);
+  }
+}
+
+async function loadAddresses(){
+  say('addr-msg', '');
+  try { renderAddresses(await Api.addresses()); }
+  catch (e) { $('addr-list').textContent = ''; say('addr-msg', e.message, 'err'); }
+}
+
+async function addAddress(){
+  const city = $('a-city').value.trim(), street = $('a-street').value.trim(), house = $('a-house').value.trim();
+  if (!city || !street || !house) return say('addr-add-msg', 'Заполните город, улицу и дом', 'err');
+  const body = { city, street, house, is_default: $('a-default').checked };
+  const apt = $('a-apt').value.trim(), com = $('a-comment').value.trim();
+  if (apt) body.apartment = apt; if (com) body.comment = com;
+  const btn = $('addr-add'); busy(btn, true); say('addr-add-msg', '');
+  try {
+    await Api.addAddress(body);
+    ['a-city','a-street','a-house','a-apt','a-comment'].forEach(i => $(i).value = ''); $('a-default').checked = false;
+    say('addr-add-msg', 'Адрес добавлен', 'ok');
+    loadAddresses();
+  } catch (e) { say('addr-add-msg', e.message, 'err'); }
+  finally { busy(btn, false); }
+}
+
+async function removeAddress(id, btn){
+  busy(btn, true);
+  try { await Api.delAddress(id); loadAddresses(); }
+  catch (e) { busy(btn, false); say('addr-msg', e.status === 404 ? 'Адрес уже удалён' : e.message, 'err'); if (e.status === 404) loadAddresses(); }
+}
+
+/* ===================== init ===================== */
+$('f-api').value = API;
+$('f-api').addEventListener('change', e => { API = e.target.value.trim().replace(/\/$/, ''); store.set(LS.api, API); });
+$('tab-login').onclick = () => setMode('login');
+$('tab-reg').onclick = () => setMode('register');
+$('auth-submit').onclick = onAuth;
+$('f-pass').addEventListener('keydown', e => { if (e.key === 'Enter') onAuth(); });
+$('logout').onclick = logout;
+$('profile-save').onclick = saveProfile;
+$('addr-add').onclick = addAddress;
+
+if (token) enterApp(); else showAuthed(false);
+</script>
+</body>
+</html>
