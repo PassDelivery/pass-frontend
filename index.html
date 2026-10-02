@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PassDelivery</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <main>
+    <header>
+      <h1>Pass<b>Delivery</b></h1>
+      <button id="logout" hidden>Выйти</button>
+    </header>
+
+    <!-- ============ AUTH ============ -->
+    <section id="auth">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-login" aria-selected="true">Вход</button>
+        <button role="tab" id="tab-reg" aria-selected="false">Регистрация</button>
+      </div>
+      <div id="reg-only" hidden>
+        <label for="f-name">Имя</label><input id="f-name" autocomplete="name">
+        <label for="f-phone">Телефон</label><input id="f-phone" type="tel" autocomplete="tel">
+        <label for="f-role">Роль</label>
+        <select id="f-role">
+          <option value="customer">Клиент</option>
+          <option value="restaurant_owner">Владелец ресторана</option>
+          <option value="courier">Курьер</option>
+        </select>
+      </div>
+      <label for="f-email">Email</label><input id="f-email" type="email" autocomplete="email">
+      <label for="f-pass">Пароль</label><input id="f-pass" type="password" minlength="8"
+        autocomplete="current-password">
+      <div class="actions"><button class="primary" id="auth-submit">Войти</button></div>
+      <div class="msg" id="auth-msg" role="status"></div>
+      <details>
+        <summary>Адрес API</summary>
+        <label for="f-api">Base URL</label><input id="f-api">
+      </details>
+    </section>
+
+    <!-- ============ APP ============ -->
+    <div id="app" hidden>
+      <section>
+        <h2>Профиль</h2>
+        <div class="msg" id="role-line" style="margin:0 0 6px"></div>
+        <label for="p-name">Имя</label><input id="p-name">
+        <label for="p-email">Email</label><input id="p-email" type="email">
+        <label for="p-phone">Телефон</label><input id="p-phone" type="tel">
+        <div class="actions"><button class="primary" id="profile-save">Сохранить профиль</button></div>
+        <div class="msg" id="profile-msg" role="status"></div>
+      </section>
+
+      <section>
+        <h2>Адреса</h2>
+        <div id="addr-list">
+          <p class="empty">Загрузка…</p>
+        </div>
+        <div class="msg" id="addr-msg" role="status"></div>
+      </section>
+
+      <section>
+        <h2>Новый адрес</h2>
+        <div class="row">
+          <div><label for="a-city">Город *</label><input id="a-city"></div>
+          <div><label for="a-street">Улица *</label><input id="a-street"></div>
+        </div>
+        <div class="row">
+          <div><label for="a-house">Дом *</label><input id="a-house"></div>
+          <div><label for="a-apt">Квартира</label><input id="a-apt"></div>
+        </div>
+        <label for="a-comment">Комментарий курьеру</label><input id="a-comment">
+        <label style="display:flex;gap:8px;align-items:center;color:var(--ink)">
+          <input type="checkbox" id="a-default" style="width:auto"> Основной адрес
+        </label>
+        <div class="actions"><button class="primary" id="addr-add">Добавить адрес</button></div>
+        <div class="msg" id="addr-add-msg" role="status"></div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
