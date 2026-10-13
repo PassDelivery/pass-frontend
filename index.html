@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PassDelivery</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PassDelivery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
 </head>
-
 <body>
-  <main>
-    <header>
-      <h1>Pass<b>Delivery</b></h1>
-      <button id="logout" hidden>Выйти</button>
-    </header>
 
-    <!-- ============ AUTH ============ -->
-    <section id="auth">
+<!-- ============ ЭКРАН ВХОДА (макет Login screen, node 36:550) ============ -->
+<div id="auth" class="login">
+  <div class="login__hero" aria-hidden="true"></div>
+  <div class="login__side">
+    <div class="card">
+      <div class="logo"><span class="logo__mark"></span>PassDelivery</div>
+      <h1 id="auth-title">Войти</h1>
+      <p class="sub" id="auth-sub">Войдите, чтобы заказать любимую еду</p>
+
       <div class="tabs" role="tablist">
-        <button role="tab" id="tab-login" aria-selected="true">Вход</button>
-        <button role="tab" id="tab-reg" aria-selected="false">Регистрация</button>
+        <button type="button" role="tab" id="tab-login" aria-selected="true">Вход</button>
+        <button type="button" role="tab" id="tab-reg" aria-selected="false">Регистрация</button>
       </div>
+
       <div id="reg-only" hidden>
         <label for="f-name">Имя</label><input id="f-name" autocomplete="name">
         <label for="f-phone">Телефон</label><input id="f-phone" type="tel" autocomplete="tel">
@@ -31,58 +35,467 @@
           <option value="courier">Курьер</option>
         </select>
       </div>
-      <label for="f-email">Email</label><input id="f-email" type="email" autocomplete="email">
-      <label for="f-pass">Пароль</label><input id="f-pass" type="password" minlength="8"
-        autocomplete="current-password">
-      <div class="actions"><button class="primary" id="auth-submit">Войти</button></div>
+
+      <label for="f-email">Email</label>
+      <div class="field">
+        <svg class="field__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <input id="f-email" type="email" autocomplete="email">
+      </div>
+
+      <label for="f-pass">Пароль</label>
+      <div class="field">
+        <svg class="field__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <input id="f-pass" type="password" minlength="8" autocomplete="current-password">
+        <button type="button" class="eye" id="toggle-pass" aria-label="Показать пароль">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+
+      <button type="button" class="primary block" id="auth-submit">Войти</button>
       <div class="msg" id="auth-msg" role="status"></div>
-      <details>
-        <summary>Адрес API</summary>
-        <label for="f-api">Base URL</label><input id="f-api">
-      </details>
+
+      <hr class="divider">
+      <button type="button" class="link" id="switch-mode">Создать аккаунт</button>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ ПРИЛОЖЕНИЕ: профиль (макет 07-profile, node 37:1716) ============ -->
+<main id="shell" hidden>
+  <header class="topbar">
+    <div class="topbar__in">
+      <a class="logo logo--left" href="#/restaurants"><span class="logo__mark"></span><span class="logo__text">PassDelivery</span></a>
+      <button type="button" class="addr-chip" id="addr-chip" title="Мои адреса">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span id="addr-chip-text">Добавьте адрес</span>
+        <svg class="addr-chip__chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <label class="search" for="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search" type="search" placeholder="Найти рестораны" autocomplete="off">
+      </label>
+      <div class="topbar__right">
+        <a class="topbar__link" href="#/profile/orders">
+          <svg width="18" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+          <span>Заказы</span>
+        </a>
+<button type="button" class="bell" id="nb-shell" aria-label="Уведомления" aria-haspopup="dialog">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="bell__count" hidden></span>
+        </button>
+        <a class="avatar avatar--sm" id="top-avatar" href="#/profile/personal" title="Профиль"></a>
+        <a class="cart-btn" id="cart-btn" href="#/cart" title="Корзина" hidden>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 10.5a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 8H6"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>
+          <span class="cart-btn__count" id="cart-count" hidden>0</span>
+          <span class="visually-hidden">Корзина</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- каталог (макет 02-restaurants, node 37:1258) -->
+  <div class="page" data-page="catalog" hidden>
+    <h1 class="page__title">Рестораны рядом</h1>
+    <div class="msg" id="catalog-msg" role="status"></div>
+    <div class="rest-grid" id="rest-grid"></div>
+    <p class="empty-state" id="catalog-empty" hidden></p>
+  </div>
+
+  <!-- меню ресторана (макет 03-restaurant-menu, node 37:1340) -->
+  <div class="page page--wide" data-page="restaurant" hidden>
+    <a class="back" href="#/restaurants">← Все рестораны</a>
+    <section class="hero" id="r-hero">
+      <span class="hero__closed" id="r-closed" hidden>Сейчас закрыт</span>
+      <h1 id="r-name"></h1>
+      <p class="hero__meta" id="r-meta"></p>
+      <p class="hero__desc" id="r-desc"></p>
     </section>
+    <p class="r-note" id="r-note" hidden>Вы вошли как <span id="r-note-role"></span> — заказывать могут только покупатели. Чтобы оформить заказ, войдите под аккаунтом покупателя.</p>
+    <div class="msg" id="r-msg" role="status"></div>
+    <div class="menu-bar">
+      <nav class="chips" id="r-cats" aria-label="Категории меню"></nav>
+      <a class="cart-pill" id="r-cartpill" href="#/cart" hidden></a>
+    </div>
+    <div id="r-menu"></div>
+    <p class="empty-state" id="r-empty" hidden></p>
+    <section class="rv-sec" id="r-reviews" hidden aria-labelledby="r-rv-title">
+      <h2 id="r-rv-title">Отзывы <span class="rv-sum" id="r-rv-sum"></span></h2>
+      <div class="rv-list" id="r-rv-list"></div>
+    </section>
+  </div>
 
-    <!-- ============ APP ============ -->
-    <div id="app" hidden>
-      <section>
-        <h2>Профиль</h2>
-        <div class="msg" id="role-line" style="margin:0 0 6px"></div>
-        <label for="p-name">Имя</label><input id="p-name">
-        <label for="p-email">Email</label><input id="p-email" type="email">
-        <label for="p-phone">Телефон</label><input id="p-phone" type="tel">
-        <div class="actions"><button class="primary" id="profile-save">Сохранить профиль</button></div>
-        <div class="msg" id="profile-msg" role="status"></div>
+  <!-- корзина (макет 04-cart, node 37:1449) -->
+  <div class="page" data-page="cart" hidden>
+    <h1 class="page__title">Корзина</h1>
+    <a class="cart-rest" id="cart-rest" hidden></a>
+    <div class="msg" id="cart-msg" role="status"></div>
+    <div class="cart-layout" id="cart-layout" hidden>
+      <section class="panel cart-list" id="cart-list" aria-label="Состав корзины"></section>
+      <aside class="panel cart-sum">
+        <h2>Ваш заказ</h2>
+        <div class="cart-sum__row"><span>Товары</span><span id="cart-goods"></span></div>
+        <div class="cart-sum__row"><span>Доставка</span><span>0 ₽</span></div>
+        <div class="cart-sum__total"><span>Итого</span><span id="cart-total"></span></div>
+        <p class="cart-sum__warn" id="cart-warn" hidden></p>
+        <a class="primary block btn-link" id="cart-checkout" href="#/checkout">Перейти к оформлению</a>
+        <button type="button" class="link cart-clear" id="cart-clear">Очистить корзину</button>
+      </aside>
+    </div>
+    <div class="panel cart-empty" id="cart-empty" hidden>
+      <p>В корзине пока пусто</p>
+      <a class="btn-outline btn-outline--sm" href="#/restaurants">Выбрать ресторан</a>
+    </div>
+  </div>
+
+  <!-- оформление заказа (макет 05-checkout, node 37:1534) -->
+  <div class="page" data-page="checkout" hidden>
+    <a class="back" href="#/cart">← Корзина</a>
+    <h1 class="page__title">Оформление заказа</h1>
+    <div class="msg" id="co-msg" role="status"></div>
+    <form class="cart-layout" id="co-form" novalidate hidden>
+      <section class="panel co-main">
+        <h2>Адрес доставки</h2>
+        <div class="co-addrs" id="co-addrs" role="radiogroup" aria-label="Адрес доставки"></div>
+        <a class="co-add" href="#/profile/addresses">+ Добавить адрес</a>
+        <h2>Комментарий курьеру</h2>
+        <textarea id="co-comment" rows="3" maxlength="200" placeholder="Например, позвонить за 5 минут"></textarea>
+        <div class="co-when"><strong>Как можно скорее</strong><span>Время доставки подскажет ресторан</span></div>
       </section>
+      <aside class="panel cart-sum">
+        <h2 id="co-rest"></h2>
+        <div class="co-items" id="co-items"></div>
+        <div class="cart-sum__row"><span>Товары</span><span id="co-goods"></span></div>
+        <div class="cart-sum__row"><span>Доставка</span><span>0 ₽</span></div>
+        <div class="cart-sum__total"><span>Итого</span><span id="co-total"></span></div>
+        <button type="submit" class="primary block" id="co-submit">Оформить заказ</button>
+      </aside>
+    </form>
+  </div>
 
-      <section>
-        <h2>Адреса</h2>
-        <div id="addr-list">
-          <p class="empty">Загрузка…</p>
+  <!-- заказ и его статус (макет 06-tracking, node 37:1615) -->
+  <div class="page" data-page="order" hidden>
+    <a class="back" href="#/profile/orders">← История заказов</a>
+    <h1 class="page__title" id="ord-title">Заказ</h1>
+    <div class="msg" id="ord-msg" role="status"></div>
+    <div id="ord-body" hidden>
+      <section class="panel ord-status">
+        <div class="ord-status__head">
+          <span class="ord-status__icon" id="ord-icon" aria-hidden="true"></span>
+          <div>
+            <div class="ord-status__title" id="ord-state"></div>
+            <div class="ord-status__sub" id="ord-sub"></div>
+          </div>
         </div>
-        <div class="msg" id="addr-msg" role="status"></div>
+        <ol class="steps" id="ord-steps"></ol>
       </section>
+      <section class="panel rv-box" id="ord-review" hidden aria-label="Отзыв о заказе">
+        <form id="rv-form" novalidate>
+          <h2>Оцените заказ</h2>
+          <p class="ohead__sub">Отзыв увидят другие покупатели на странице ресторана</p>
+          <div class="rv-stars-input" id="rv-stars" role="radiogroup" aria-label="Оценка"></div>
+          <textarea id="rv-body" rows="3" maxlength="1000" placeholder="Что понравилось, а что можно улучшить?"></textarea>
+          <div class="msg" id="rv-msg" role="status"></div>
+          <button type="submit" class="primary" id="rv-submit">Отправить отзыв</button>
+        </form>
+        <div id="rv-done" hidden></div>
+      </section>
+      <div class="cart-layout">
+        <section class="panel ord-items">
+          <h2>Состав заказа</h2>
+          <div id="ord-items"></div>
+          <h2>История статусов</h2>
+          <ol class="ord-history" id="ord-history"></ol>
+        </section>
+        <aside class="panel cart-sum">
+          <h2>Детали заказа</h2>
+          <dl class="ord-facts" id="ord-facts"></dl>
+          <button type="button" class="link cart-clear danger-link" id="ord-cancel" hidden>Отменить заказ</button>
+        </aside>
+      </div>
+    </div>
+  </div>
 
-      <section>
-        <h2>Новый адрес</h2>
-        <div class="row">
-          <div><label for="a-city">Город *</label><input id="a-city"></div>
-          <div><label for="a-street">Улица *</label><input id="a-street"></div>
+  <div class="page" data-page="profile">
+    <h1 class="page__title">Профиль</h1>
+    <div class="profile">
+      <aside class="panel side">
+        <div class="side__user">
+          <span class="avatar" id="side-avatar" aria-hidden="true"></span>
+          <div class="side__who">
+            <div class="side__name" id="side-name"></div>
+            <div class="side__role" id="side-role"></div>
+          </div>
         </div>
-        <div class="row">
-          <div><label for="a-house">Дом *</label><input id="a-house"></div>
-          <div><label for="a-apt">Квартира</label><input id="a-apt"></div>
+        <nav class="side__nav" id="p-nav" aria-label="Разделы профиля">
+          <a href="#/profile/personal" data-tab="personal">Личные данные</a>
+          <a href="#/profile/addresses" data-tab="addresses">Адреса</a>
+          <a href="#/profile/orders" data-tab="orders">История заказов</a>
+          <a href="#/owner/overview" id="nav-owner" hidden>Кабинет ресторана</a>
+          <button type="button" id="logout">Выйти</button>
+        </nav>
+      </aside>
+
+      <section class="panel main">
+        <div data-view="personal" hidden>
+          <h2>Личные данные</h2>
+          <form id="personal-form" class="form-narrow" novalidate>
+            <label for="p-name">Имя</label><input id="p-name" autocomplete="name">
+            <label for="p-email">Email</label><input id="p-email" type="email" autocomplete="email">
+            <label for="p-phone">Телефон</label><input id="p-phone" type="tel" autocomplete="tel" placeholder="+79991234567">
+            <div class="actions"><button type="submit" class="primary" id="profile-save">Сохранить</button></div>
+            <div class="msg" id="profile-msg" role="status"></div>
+          </form>
         </div>
-        <label for="a-comment">Комментарий курьеру</label><input id="a-comment">
-        <label style="display:flex;gap:8px;align-items:center;color:var(--ink)">
-          <input type="checkbox" id="a-default" style="width:auto"> Основной адрес
-        </label>
-        <div class="actions"><button class="primary" id="addr-add">Добавить адрес</button></div>
-        <div class="msg" id="addr-add-msg" role="status"></div>
+
+        <div data-view="addresses">
+          <h2>Мои адреса</h2>
+          <div class="addr-list" id="addr-list"><p class="empty">Загрузка…</p></div>
+          <div class="msg" id="addr-msg" role="status"></div>
+          <button type="button" class="btn-outline" id="addr-new">+ Добавить адрес</button>
+        </div>
+
+        <div data-view="orders" hidden>
+          <h2>История заказов</h2>
+          <div class="msg" id="hist-msg" role="status"></div>
+          <div class="hist-list" id="hist-list"></div>
+          <p class="empty-state" id="hist-empty" hidden>Заказов пока нет. <a href="#/restaurants">Выбрать ресторан</a></p>
+        </div>
       </section>
     </div>
-  </main>
+  </div>
+</main>
 
-  <script type="module" src="js/app.js"></script>
+<!-- ============ КАБИНЕТ ВЛАДЕЛЬЦА (макет 09-restaurant-owner, node 37:1859) ============ -->
+<main id="owner" class="owner" hidden>
+  <aside class="panel oside">
+    <a class="logo logo--left" href="#/owner/overview"><span class="logo__mark"></span><span class="logo__text">PassDelivery</span></a>
+
+    <div class="side__user oside__rest">
+      <span class="avatar avatar--rest" id="o-avatar" aria-hidden="true"></span>
+      <div class="side__who">
+        <div class="side__name" id="o-name"></div>
+        <div class="side__role"><span class="dot" id="o-dot"></span><span id="o-status"></span></div>
+      </div>
+      <button type="button" class="bell" id="nb-owner" aria-label="Уведомления" aria-haspopup="dialog">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="bell__count" hidden></span>
+        </button>
+    </div>
+    <select id="o-switch" class="oside__switch" aria-label="Выбрать ресторан" hidden></select>
+
+    <nav class="side__nav" id="o-nav" aria-label="Разделы кабинета">
+      <a href="#/owner/overview" data-tab="overview">Обзор</a>
+      <a href="#/owner/menu" data-tab="menu">Меню</a>
+      <a href="#/owner/orders" data-tab="orders">Заказы <span class="nav-count" id="oo-count" hidden></span></a>
+      <a href="#/owner/reviews" data-tab="reviews">Отзывы</a>
+      <a href="#/owner/settings" data-tab="settings">Настройки</a>
+    </nav>
+
+    <div class="side__nav oside__foot">
+      <button type="button" id="o-new">+ Новый ресторан</button>
+      <a href="#/profile/personal">Мой профиль</a>
+      <button type="button" id="o-logout">Выйти</button>
+    </div>
+  </aside>
+
+  <div class="omain">
+    <div class="msg" id="owner-msg" role="status"></div>
+
+    <section data-oview="overview" hidden>
+      <div class="ohead">
+        <div><h1 id="ov-title"></h1><p class="ohead__sub">Обзор ресторана</p></div>
+        <a class="btn-outline btn-outline--sm" href="#/owner/settings">Редактировать</a>
+      </div>
+      <div class="panel ocard ostatus">
+        <div>
+          <div class="ostatus__title" id="ov-open-text"></div>
+          <div class="ostatus__sub">Когда ресторан закрыт, покупатели не видят его в каталоге</div>
+        </div>
+        <button type="button" class="switch" id="ov-open" role="switch" aria-checked="false" aria-label="Ресторан открыт"><span></span></button>
+      </div>
+      <div class="msg" id="ov-msg" role="status"></div>
+      <div class="panel ocard">
+        <dl class="ofacts">
+          <div><dt>Описание</dt><dd id="ov-desc"></dd></div>
+          <div><dt>Адрес</dt><dd id="ov-address"></dd></div>
+          <div><dt>Телефон</dt><dd id="ov-phone"></dd></div>
+          <div><dt>Создан</dt><dd id="ov-created"></dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section data-oview="menu" hidden>
+      <div class="ohead">
+        <div><h1>Меню</h1><p class="ohead__sub">Управление блюдами ресторана</p></div>
+        <div class="ohead__actions">
+          <button type="button" class="btn-outline btn-outline--sm" id="cat-new">+ Категория</button>
+          <button type="button" class="primary" id="dish-new">+ Добавить блюдо</button>
+        </div>
+      </div>
+      <div class="chips" id="cat-chips" role="tablist" aria-label="Категории"></div>
+      <div class="msg" id="cat-msg" role="status"></div>
+      <div class="panel dishes">
+        <div class="dishes__head" aria-hidden="true">
+          <span>Блюдо</span><span>Категория</span><span>Цена</span><span>Статус</span><span>Действия</span>
+        </div>
+        <div id="dish-list"></div>
+        <p class="empty-state" id="dish-empty"></p>
+      </div>
+    </section>
+
+    <section data-oview="orders" hidden>
+      <div class="ohead">
+        <div><h1>Заказы</h1><p class="ohead__sub">Список обновляется сам каждые 20 секунд</p></div>
+        <button type="button" class="btn-outline btn-outline--sm" id="oo-refresh">Обновить</button>
+      </div>
+      <div class="chips" id="oo-tabs" role="tablist" aria-label="Фильтр заказов"></div>
+      <div class="msg" id="oo-msg" role="status"></div>
+      <div class="oo-list" id="oo-list"></div>
+      <div class="panel ocard" id="oo-empty" hidden><p class="empty-state" id="oo-empty-text"></p></div>
+    </section>
+
+    <section data-oview="reviews" hidden>
+      <div class="ohead"><div><h1>Отзывы</h1><p class="ohead__sub" id="orv-sum">Что говорят покупатели</p></div></div>
+      <div class="msg" id="orv-msg" role="status"></div>
+      <div class="rv-list" id="orv-list"></div>
+      <div class="panel ocard" id="orv-empty" hidden><p class="empty-state">Отзывов пока нет — они появятся после первых доставленных заказов.</p></div>
+    </section>
+
+    <section data-oview="settings" hidden>
+      <div class="ohead"><div><h1 id="rs-title">Настройки</h1><p class="ohead__sub" id="rs-sub"></p></div></div>
+      <div class="panel ocard">
+        <form id="rs-form" class="form-narrow" novalidate>
+          <label for="rs-name">Название *</label><input id="rs-name" placeholder="Casa Pasta">
+          <label for="rs-desc">Описание</label><textarea id="rs-desc" rows="3" maxlength="100" placeholder="Итальянская кухня, свежая паста каждый день"></textarea>
+          <label for="rs-address">Адрес *</label><input id="rs-address" placeholder="Москва, ул. Ленина, 12">
+          <label for="rs-phone">Телефон</label><input id="rs-phone" type="tel" placeholder="+79991234567">
+          <label class="check"><input type="checkbox" id="rs-open"> Ресторан открыт и принимает заказы</label>
+          <div class="msg" id="rs-msg" role="status"></div>
+          <div class="actions">
+            <button type="submit" class="primary" id="rs-save">Сохранить</button>
+            <button type="button" id="rs-cancel" hidden>Отмена</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ КАБИНЕТ КУРЬЕРА (макет 10-courier, node 37:1941) ============ -->
+<main id="courier" class="owner" hidden>
+  <aside class="panel oside">
+    <a class="logo logo--left" href="#/courier"><span class="logo__mark"></span><span class="logo__text">PassDelivery</span></a>
+    <div class="side__user oside__rest">
+      <span class="avatar" id="k-avatar" aria-hidden="true"></span>
+      <div class="side__who">
+        <div class="side__name" id="k-name"></div>
+        <div class="side__role"><span class="dot" id="k-dot"></span><span id="k-status"></span></div>
+      </div>
+      <button type="button" class="bell" id="nb-courier" aria-label="Уведомления" aria-haspopup="dialog">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="bell__count" hidden></span>
+        </button>
+    </div>
+    <div class="k-online">
+      <span>На линии</span>
+      <button type="button" class="switch" id="k-switch" role="switch" aria-checked="false" aria-label="Принимать заказы"><span></span></button>
+    </div>
+    <nav class="side__nav" aria-label="Разделы курьера">
+      <a href="#/courier" aria-current="page">Доставки</a>
+    </nav>
+    <div class="side__nav oside__foot">
+      <a href="#/profile/personal">Мой профиль</a>
+      <button type="button" id="k-logout">Выйти</button>
+    </div>
+  </aside>
+
+  <div class="omain">
+    <div class="ohead">
+      <div><h1 id="k-hello"></h1><p class="ohead__sub" id="k-sub"></p></div>
+      <button type="button" class="btn-outline btn-outline--sm" id="k-refresh">Обновить</button>
+    </div>
+    <div class="msg" id="k-msg" role="status"></div>
+
+    <section class="panel k-active" id="k-active" hidden aria-label="Текущая доставка"></section>
+
+    <section id="k-offers-box" hidden>
+      <h2 class="k-h2">Доступные доставки</h2>
+      <div class="k-offers" id="k-offers"></div>
+    </section>
+
+    <div class="panel ocard" id="k-empty" hidden><p class="empty-state" id="k-empty-text"></p></div>
+  </div>
+</main>
+
+<!-- ============ Панель уведомлений (общая для всех ролей) ============ -->
+<div class="notif-panel" id="notif-panel" role="dialog" aria-label="Уведомления" hidden>
+  <div class="notif-panel__head">
+    <strong>Уведомления</strong>
+    <button type="button" class="link" id="notif-readall">Прочитать все</button>
+  </div>
+  <div class="notif-list" id="notif-list"></div>
+  <p class="notif-empty" id="notif-empty" hidden>Уведомлений пока нет</p>
+</div>
+
+<!-- ============ Диалог категории ============ -->
+<dialog class="modal modal--sm" id="cat-dialog" aria-labelledby="cat-form-title">
+  <form id="cat-form" novalidate>
+    <h2 id="cat-form-title">Новая категория</h2>
+    <label for="c-name">Название *</label><input id="c-name" maxlength="35" placeholder="Например, Пицца">
+    <label for="c-order">Порядок в меню *</label><input id="c-order" type="number" min="1" step="1" inputmode="numeric">
+    <p class="hint">Категории в меню идут по возрастанию этого числа</p>
+    <div class="msg" id="cat-form-msg" role="status"></div>
+    <div class="actions">
+      <button type="button" id="cat-cancel">Отмена</button>
+      <button type="submit" class="primary" id="cat-save">Добавить</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ Диалог блюда ============ -->
+<dialog class="modal" id="dish-dialog" aria-labelledby="dish-form-title">
+  <form id="dish-form" novalidate>
+    <h2 id="dish-form-title">Новое блюдо</h2>
+    <label for="d-cat">Категория *</label><select id="d-cat"></select>
+    <label for="d-name">Название *</label><input id="d-name" maxlength="50" placeholder="Карбонара">
+    <label for="d-desc">Описание</label><textarea id="d-desc" rows="3" maxlength="200" placeholder="Спагетти, гуанчиале, желток, пекорино"></textarea>
+    <div class="row">
+      <div><label for="d-price">Цена, ₽ *</label><input id="d-price" inputmode="decimal" autocomplete="off" placeholder="540"></div>
+      <div><label for="d-time">Время готовки, мин</label><input id="d-time" type="number" min="1" step="1" inputmode="numeric" placeholder="15"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="d-available" checked> В продаже — блюдо видно покупателям</label>
+    <div class="msg" id="dish-form-msg" role="status"></div>
+    <div class="actions">
+      <button type="button" id="dish-cancel">Отмена</button>
+      <button type="submit" class="primary" id="dish-save">Добавить блюдо</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ Диалог адреса ============ -->
+<dialog class="modal" id="addr-dialog" aria-labelledby="addr-form-title">
+  <form id="addr-form" novalidate>
+    <h2 id="addr-form-title">Новый адрес</h2>
+    <div class="row">
+      <div><label for="a-city">Город *</label><input id="a-city" placeholder="Москва"></div>
+      <div><label for="a-street">Улица *</label><input id="a-street" placeholder="ул. Ленина"></div>
+    </div>
+    <div class="row">
+      <div><label for="a-house">Дом *</label><input id="a-house" inputmode="numeric"></div>
+      <div><label for="a-apt">Квартира</label><input id="a-apt" inputmode="numeric"></div>
+    </div>
+    <label for="a-comment">Комментарий курьеру</label><input id="a-comment" placeholder="Код домофона, подъезд, этаж">
+    <label class="check"><input type="checkbox" id="a-default"> Адрес по умолчанию</label>
+    <div class="msg" id="addr-form-msg" role="status"></div>
+    <div class="actions">
+      <button type="button" class="danger" id="addr-delete" hidden>Удалить адрес</button>
+      <button type="button" id="addr-cancel">Отмена</button>
+      <button type="submit" class="primary" id="addr-save">Сохранить</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="js/app.js"></script>
 </body>
-
 </html>
