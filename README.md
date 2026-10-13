@@ -7,12 +7,12 @@
 ES-модули не работают с `file://`, нужен любой статический сервер:
 
 ```bash
-cd passdelivery
-python3 -m http.server 5173   # или: npx serve .
+cd passdelivery-frontend
+python3 serve.py   # http://localhost:5173, без кэша браузера
 ```
 
 Откройте http://localhost:5173. Адрес бэкенда по умолчанию — `http://localhost:5050`
-(меняется на экране входа в блоке «Адрес API»). На бэке должен быть включён CORS
+(меняется в `js/config.js`). На бэке должен быть включён CORS
 для origin фронтенда (`Authorization`, `Content-Type`, методы `PATCH`, `DELETE`).
 
 ## Структура
