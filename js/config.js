@@ -1,3 +1,5 @@
 // Адрес бэкенда. Меняется только здесь.
-// Префикс /api/v1 — как у реального бэка (в openapi.yaml его пока нет).
-export const API_BASE = 'http://77.91.115.138:5050/api/v1';
+// Локально (localhost) фронт и бэк на разных портах; на сервере nginx отдаёт фронт и проксирует /api/ на бэк,
+// поэтому там достаточно относительного пути — без CORS и без IP в коде.
+const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+export const API_BASE = local ? 'http://localhost:5050/api/v1' : '/api/v1';
