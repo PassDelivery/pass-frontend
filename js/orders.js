@@ -209,6 +209,7 @@ function renderOrder(o, history){
 /* ---------- отзыв о доставленном заказе ---------- */
 let rvOrder = null;
 let rvRating = 0;
+let rvCourier = 0;
 
 // Есть ли уже отзыв — узнаём из публичного списка отзывов ресторана (в нём есть order_id)
 async function loadOrderReview(o){
@@ -231,19 +232,24 @@ function showReviewState(review){
     box.append(h, reviewCard(review));
     return;
   }
-  rvRating = 0; $('rv-body').value = ''; say('rv-msg', '');
+  rvRating = 0; rvCourier = 0; $('rv-body').value = ''; say('rv-msg', '');
   renderStarsInput();
 }
 
 function renderStarsInput(){
-  const box = $('rv-stars'); box.textContent = '';
+  starsInput('rv-stars', rvRating, (n) => { rvRating = n; });
+  starsInput('rv-cstars', rvCourier, (n) => { rvCourier = rvCourier === n ? 0 : n; });   // повторный клик снимает необязательную оценку
+}
+
+function starsInput(id, value, set){
+  const box = $(id); box.textContent = '';
   for (let n = 1; n <= 5; n++) {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'rv-star' + (n <= rvRating ? ' rv-star--on' : '');
+    b.type = 'button'; b.className = 'rv-star' + (n <= value ? ' rv-star--on' : '');
     b.textContent = '★'; b.role = 'radio';
-    b.setAttribute('aria-checked', String(n === rvRating));
+    b.setAttribute('aria-checked', String(n === value));
     b.setAttribute('aria-label', n + ' из 5');
-    b.onclick = () => { rvRating = n; renderStarsInput(); };
+    b.onclick = () => { set(n); renderStarsInput(); };
     box.append(b);
   }
 }
@@ -251,8 +257,9 @@ function renderStarsInput(){
 async function submitReview(ev){
   ev.preventDefault();
   if (!rvOrder) return;
-  if (!rvRating) return say('rv-msg', 'Поставьте оценку от 1 до 5 звёзд', 'err');
+  if (!rvRating) return say('rv-msg', 'Оцените еду и ресторан от 1 до 5 звёзд', 'err');
   const body = { rating: rvRating };
+  if (rvCourier) body.courier_rating = rvCourier;
   const text = $('rv-body').value.trim();
   if (text) body.body = text;
   const btn = $('rv-submit'); busy(btn, true); say('rv-msg', '');

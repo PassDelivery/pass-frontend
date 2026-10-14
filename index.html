@@ -193,7 +193,10 @@
         <form id="rv-form" novalidate>
           <h2>Оцените заказ</h2>
           <p class="ohead__sub">Отзыв увидят другие покупатели на странице ресторана</p>
-          <div class="rv-stars-input" id="rv-stars" role="radiogroup" aria-label="Оценка"></div>
+          <p class="rv-label">Еда и ресторан</p>
+          <div class="rv-stars-input" id="rv-stars" role="radiogroup" aria-label="Оценка ресторана"></div>
+          <p class="rv-label">Курьер <span>— по желанию</span></p>
+          <div class="rv-stars-input" id="rv-cstars" role="radiogroup" aria-label="Оценка курьера"></div>
           <textarea id="rv-body" rows="3" maxlength="1000" placeholder="Что понравилось, а что можно улучшить?"></textarea>
           <div class="msg" id="rv-msg" role="status"></div>
           <button type="submit" class="primary" id="rv-submit">Отправить отзыв</button>
@@ -268,9 +271,9 @@
 
 <!-- ============ КАБИНЕТ ВЛАДЕЛЬЦА (макет 09-restaurant-owner, node 37:1859) ============ -->
 <main id="owner" class="owner" hidden>
-  <aside class="panel oside">
+  <aside class="oside">
     <a class="logo logo--left" href="#/owner/overview"><span class="logo__mark"></span><span class="logo__text">PassDelivery</span></a>
-
+    <div class="oside__panel">
     <div class="side__user oside__rest">
       <span class="avatar avatar--rest" id="o-avatar" aria-hidden="true"></span>
       <div class="side__who">
@@ -296,6 +299,7 @@
       <button type="button" id="o-new">+ Новый ресторан</button>
       <a href="#/profile/personal">Мой профиль</a>
       <button type="button" id="o-logout">Выйти</button>
+    </div>
     </div>
   </aside>
 
@@ -384,8 +388,9 @@
 
 <!-- ============ КАБИНЕТ КУРЬЕРА (макет 10-courier, node 37:1941) ============ -->
 <main id="courier" class="owner" hidden>
-  <aside class="panel oside">
+  <aside class="oside">
     <a class="logo logo--left" href="#/courier"><span class="logo__mark"></span><span class="logo__text">PassDelivery</span></a>
+    <div class="oside__panel">
     <div class="side__user oside__rest">
       <span class="avatar" id="k-avatar" aria-hidden="true"></span>
       <div class="side__who">
@@ -401,12 +406,14 @@
       <span>На линии</span>
       <button type="button" class="switch" id="k-switch" role="switch" aria-checked="false" aria-label="Принимать заказы"><span></span></button>
     </div>
-    <nav class="side__nav" aria-label="Разделы курьера">
-      <a href="#/courier" aria-current="page">Доставки</a>
+    <nav class="side__nav" id="k-nav" aria-label="Разделы курьера">
+      <a href="#/courier" data-view="work">Доставки</a>
+      <a href="#/courier/history" data-view="history">История</a>
+      <a href="#/profile/personal">Профиль</a>
     </nav>
     <div class="side__nav oside__foot">
-      <a href="#/profile/personal">Мой профиль</a>
       <button type="button" id="k-logout">Выйти</button>
+    </div>
     </div>
   </aside>
 
@@ -417,14 +424,36 @@
     </div>
     <div class="msg" id="k-msg" role="status"></div>
 
-    <section class="panel k-active" id="k-active" hidden aria-label="Текущая доставка"></section>
+    <div class="k-stats">
+      <div class="panel k-stat"><span>Сегодня</span><strong id="k-today">—</strong></div>
+      <div class="panel k-stat"><span>Заработано сегодня</span><strong id="k-earned">—</strong></div>
+      <div class="panel k-stat"><span>Рейтинг</span><strong id="k-rating">—</strong><small id="k-rating-sub"></small></div>
+    </div>
 
-    <section id="k-offers-box" hidden>
-      <h2 class="k-h2">Доступные доставки</h2>
-      <div class="k-offers" id="k-offers"></div>
+    <section id="k-work">
+      <h2 class="k-h2" id="k-work-title">Доступные доставки</h2>
+      <div class="chips k-tabs" role="tablist" aria-label="Доставки">
+        <button type="button" class="chip" role="tab" data-ktab="offers">Доступные <span class="nav-count" id="k-offers-count" hidden></span></button>
+        <button type="button" class="chip" role="tab" data-ktab="mine">Мои заказы <span class="nav-count" id="k-mine-count" hidden></span></button>
+      </div>
+
+      <div class="k-board" id="k-pane-offers">
+        <div class="panel k-table" id="k-offers"></div>
+        <aside class="panel k-detail" id="k-detail" aria-label="Выбранная доставка"></aside>
+      </div>
+
+      <div id="k-pane-mine" hidden>
+        <section class="panel k-active" id="k-active" aria-label="Текущая доставка"></section>
+      </div>
+
+      <div class="panel ocard" id="k-empty" hidden><p class="empty-state" id="k-empty-text"></p></div>
     </section>
 
-    <div class="panel ocard" id="k-empty" hidden><p class="empty-state" id="k-empty-text"></p></div>
+    <section id="k-history" hidden>
+      <h2 class="k-h2">История доставок</h2>
+      <div class="panel k-table" id="k-hist"></div>
+      <div class="panel ocard" id="k-hist-empty" hidden><p class="empty-state">Здесь появятся заказы, которые вы доставили</p></div>
+    </section>
   </div>
 </main>
 

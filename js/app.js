@@ -84,7 +84,7 @@ function route(){
   const m = location.hash.match(/^#\/(profile|owner|restaurants|cart|checkout|orders)(?:\/([\w-]+))?/);
   if (!(m?.[1] === 'orders' && m[2])) leaveOrder();
   // владелец по умолчанию попадает в кабинет, остальные — в каталог ресторанов
-  if (/^#\/courier/.test(location.hash) && isCourier()) { showScreen('courier'); openCourier(user); return; }
+  if (/^#\/courier/.test(location.hash) && isCourier()) { showScreen('courier'); openCourier(user, location.hash.match(/^#\/courier\/(\w+)/)?.[1]); return; }
   if (!m && isCourier()) { location.replace('#/courier'); return; }
   const area = m ? m[1] : isOwner() ? 'owner' : 'restaurants';
   if (area === 'owner' && isOwner()) {
