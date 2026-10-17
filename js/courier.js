@@ -49,8 +49,8 @@ function greeting(){
 function showView(){
   $('k-work').hidden = view !== 'work';
   $('k-history').hidden = view !== 'history';
-  document.querySelectorAll('#k-nav a[data-view]').forEach(a => {
-    if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  document.querySelectorAll('#k-nav a[data-kview]').forEach(a => {
+    if (a.dataset.kview === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
 }
 

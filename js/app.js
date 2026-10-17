@@ -103,7 +103,7 @@ function route(){
   }
   showPage('profile');
   const tab = m && m[1] === 'profile' && TABS.includes(m[2]) ? m[2] : 'addresses';
-  document.querySelectorAll('[data-view]').forEach(v => { v.hidden = v.dataset.view !== tab; });
+  document.querySelectorAll('#shell [data-view]').forEach(v => { v.hidden = v.dataset.view !== tab; });   // только вкладки профиля, не чужие экраны
   if (tab === 'orders' && isCustomer()) loadOrderHistory();
   document.querySelectorAll('#p-nav a[data-tab]').forEach(a => {
     if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
