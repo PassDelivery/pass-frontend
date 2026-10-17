@@ -1,5 +1,5 @@
 import { session, Api, store } from './api.js';
-import { $, say, busy, errText, initials, showPage } from './ui.js';
+import { $, say, busy, errText, initials, showPage, paintPhoto, shrinkPhoto } from './ui.js';
 import { openOwner, resetOwner } from './owner.js';
 import { openCatalog, openRestaurant, setQuery, setCanOrder } from './catalog.js';
 import { openCart, loadCart, resetCart } from './cart.js';
@@ -132,7 +132,8 @@ function fillUser(u){
   rememberUser(u);
   $('side-name').textContent = u.name || u.email || '';
   $('side-role').textContent = roleNames[u.role] || u.role || '';
-  $('side-avatar').textContent = $('top-avatar').textContent = initials(u.name);
+  $('side-avatar').textContent = $('top-avatar').textContent = $('p-avatar').textContent = initials(u.name);
+  for (const id of ['side-avatar', 'top-avatar', 'p-avatar']) paintPhoto($(id), u.avatar_url, null);
   $('p-name').value = u.name || ''; $('p-email').value = u.email || ''; $('p-phone').value = u.phone || '';
   $('nav-owner').hidden = !isOwner() && !isCourier();
   $('nav-owner').textContent = isCourier() ? 'Мои доставки' : 'Кабинет ресторана';
@@ -155,6 +156,20 @@ async function enterApp(authRes){
   if (isCustomer()) await loadCart();
   route();
   if (!isCourier()) loadAddresses();     // адреса курьеру бэк не отдаёт
+}
+
+/* ---------- фото профиля: выбрал файл — сразу уменьшаем и загружаем ---------- */
+const AVATAR_HINT = 'Фото профиля видно в шапке и в кабинете';
+async function changeAvatar(){
+  const input = $('p-avatar-file'), file = input.files[0];
+  if (!file || !user) return;
+  const hint = $('p-avatar-hint'); hint.classList.remove('err'); hint.textContent = 'Загружаем фото…';
+  try {
+    fillUser(await Api.uploadAvatar(await shrinkPhoto(file, 512)));
+    hint.textContent = 'Фото обновлено';
+  } catch (e) {
+    hint.textContent = e instanceof Error && !e.status ? e.message : errText(e); hint.classList.add('err');
+  } finally { input.value = ''; }
 }
 
 async function savePersonal(ev){
@@ -308,6 +323,7 @@ $('f-pass').addEventListener('keydown', e => { if (e.key === 'Enter') onAuth(); 
 $('logout').onclick = logout;
 $('o-logout').onclick = logout;
 $('k-logout').onclick = logout;
+$('p-avatar-file').onchange = changeAvatar;
 $('personal-form').onsubmit = savePersonal;
 $('addr-chip').onclick = () => { location.hash = '#/profile/addresses'; };
 $('search').addEventListener('input', (e) => {
