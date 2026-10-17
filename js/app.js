@@ -102,7 +102,9 @@ function route(){
     return;
   }
   showPage('profile');
-  const tab = m && m[1] === 'profile' && TABS.includes(m[2]) ? m[2] : 'addresses';
+  // адреса и история заказов есть только у покупателя — владелец и курьер не заказывают
+  const own = isCustomer() ? TABS : TABS.filter(t => t === 'personal');
+  const tab = m && m[1] === 'profile' && own.includes(m[2]) ? m[2] : own.includes('addresses') ? 'addresses' : 'personal';
   document.querySelectorAll('#shell [data-view]').forEach(v => { v.hidden = v.dataset.view !== tab; });   // только вкладки профиля, не чужие экраны
   if (tab === 'orders' && isCustomer()) loadOrderHistory();
   document.querySelectorAll('#p-nav a[data-tab]').forEach(a => {
@@ -153,9 +155,11 @@ async function enterApp(authRes){
   startNotifications(user?.role);
   setCanOrder(isCustomer(), user?.role);
   $('cart-btn').hidden = !isCustomer();
+  $('addr-chip').hidden = !isCustomer();
+  document.querySelectorAll('#p-nav a[data-tab="addresses"], #p-nav a[data-tab="orders"]').forEach(a => { a.hidden = !isCustomer(); });
   if (isCustomer()) await loadCart();
   route();
-  if (!isCourier()) loadAddresses();     // адреса курьеру бэк не отдаёт
+  if (isCustomer()) loadAddresses();
 }
 
 /* ---------- фото профиля: выбрал файл — сразу уменьшаем и загружаем ---------- */
