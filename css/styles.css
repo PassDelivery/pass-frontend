@@ -600,3 +600,13 @@ button.status:hover{box-shadow:inset 0 0 0 1px currentColor}
 label.photo-field__btn{margin:0;font-size:14px;cursor:pointer}
 .photo-field__hint{color:var(--mute);font-size:12px}
 .photo-field__hint.err{color:var(--err)}
+
+/* ---------- главная кнопка корзины и оформления ---------- */
+.cart-sum .primary.block{display:flex;align-items:center;justify-content:center;width:100%;height:56px;margin-top:24px;border-radius:14px;font-size:16px;font-weight:700;letter-spacing:.01em;box-shadow:0 10px 24px -10px rgba(217,119,87,.75);transition:background .15s,box-shadow .15s,transform .15s}
+.cart-sum .primary.block:hover:not(:disabled):not(.is-disabled){transform:translateY(-1px);box-shadow:0 14px 28px -12px rgba(217,119,87,.85)}
+.cart-sum .primary.block:active:not(:disabled):not(.is-disabled){transform:none;box-shadow:0 6px 16px -10px rgba(217,119,87,.75)}
+.cart-sum .primary.block:disabled,.cart-sum .primary.block.is-disabled{box-shadow:none}
+
+/* ---------- аватарка пользователя ---------- */
+.avatar--xl{width:88px;height:88px;font-size:28px}
+.avatar-edit{display:flex;align-items:center;gap:18px;margin:4px 0 8px}

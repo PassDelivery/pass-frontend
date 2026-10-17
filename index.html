@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PassDelivery</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="img/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="theme-color" content="#d97757">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
@@ -242,6 +246,14 @@
       <section class="panel main">
         <div data-view="personal" hidden>
           <h2>Личные данные</h2>
+          <div class="avatar-edit">
+            <span class="avatar avatar--xl" id="p-avatar" aria-hidden="true"></span>
+            <div class="photo-field__side">
+              <label class="btn-outline btn-outline--sm photo-field__btn" for="p-avatar-file">Изменить фото</label>
+              <input type="file" id="p-avatar-file" accept="image/*" hidden>
+              <small class="photo-field__hint" id="p-avatar-hint">Фото профиля видно в шапке и в кабинете</small>
+            </div>
+          </div>
           <form id="personal-form" class="form-narrow" novalidate>
             <label for="p-name">Имя</label><input id="p-name" autocomplete="name">
             <label for="p-email">Email</label><input id="p-email" type="email" autocomplete="email">

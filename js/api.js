@@ -48,6 +48,7 @@ export const Api = {
   login:      (b)  => api('POST',   '/auth/login', b),
   me:         ()   => api('GET',    '/users/me'),
   updateMe:   (b)  => api('PATCH',  '/users/me', b),
+  uploadAvatar: (blob) => api('POST', '/users/me/avatar', photoForm(blob)),
   addresses:  ()   => api('GET',    '/users/me/addresses'),
   addAddress: (b)  => api('POST',   '/users/me/addresses', b),
   delAddress: (id) => api('DELETE', '/users/me/addresses/' + id),

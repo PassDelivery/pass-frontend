@@ -2,7 +2,7 @@
    Предложения подбирает бэк при каждом GET /courier/deliveries, поэтому список периодически перезапрашиваем.
    Вид: #/courier — доставки (вкладки «Доступные» / «Мои заказы»), #/courier/history — история */
 import { Api } from './api.js';
-import { $, say, busy, errText, initials, price } from './ui.js';
+import { $, say, busy, errText, initials, price, paintPhoto } from './ui.js';
 
 let me = null;
 let status = 'offline';
@@ -29,6 +29,7 @@ export async function openCourier(user, next){
   view = next === 'history' ? 'history' : 'work';
   $('k-name').textContent = user.name || user.email;
   $('k-avatar').textContent = initials(user.name);
+  paintPhoto($('k-avatar'), user.avatar_url, null);
   $('k-hello').textContent = greeting() + ', ' + (user.name || '').split(' ')[0];
   showView();
   if (!first) { if (view === 'history') loadStats(); return; }
