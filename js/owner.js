@@ -10,8 +10,8 @@ let list = [];           // его рестораны
 let currentId = null;
 let creating = false;    // форма в режиме «новый ресторан»
 
-/* GET /internal/restaurants на бэке пока нет — держим копию в localStorage,
-   чтобы созданный ресторан не пропадал после перезагрузки страницы */
+/* Список берём с бэка (GET /internal/restaurants). Копия в localStorage — только запасной вариант,
+   если ручки на сервере ещё нет: тогда видны лишь рестораны, созданные с этого устройства */
 const cacheKey = () => 'pass_owner_rests_' + owner.id;
 const readCache = () => { try { return JSON.parse(store.get(cacheKey())) || []; } catch { return []; } };
 const saveCache = () => store.set(cacheKey(), JSON.stringify(list));
@@ -187,7 +187,7 @@ function cancelCreate(){
 }
 
 /* ---------- меню: категории ---------- */
-/* Списка категорий (GET) на бэке пока нет — как и с ресторанами, держим копию в localStorage */
+/* Категории и блюда тоже берём с бэка; localStorage — запасной вариант, как с ресторанами */
 let cats = [];            // категории текущего ресторана
 let catsFor = null;       // id ресторана, для которого загружены cats
 let activeCat = 'all';
@@ -197,7 +197,6 @@ const readCats = (restId) => { try { return JSON.parse(store.get(catKey(restId))
 const saveCats = () => store.set(catKey(catsFor), JSON.stringify(cats));
 const byOrder = (a, b) => Number(a.sort_order) - Number(b.sort_order) || a.name.localeCompare(b.name, 'ru');
 
-/* Списка блюд (GET) тоже нет — храним созданные в localStorage */
 let dishes = [];
 const dishKey = (restId) => 'pass_owner_dishes_' + restId;
 const readDishes = (restId) => { try { return JSON.parse(store.get(dishKey(restId))) || []; } catch { return []; } };
@@ -211,12 +210,12 @@ async function loadCategories(restId){
   if (catsFor !== restId) { catsFor = restId; activeCat = 'all'; cats = readCats(restId); dishes = readDishes(restId); }
   renderMenu();
   say('cat-msg', '');
-  try {
-    cats = (await Api.categories(restId)) || [];
-    saveCats(); renderMenu();
-  } catch (e) {
-    if (e.status !== 404 && e.status !== 405) say('cat-msg', errText(e), 'err');
-  }
+  const [c, d] = await Promise.allSettled([Api.categories(restId), Api.ownerDishes(restId)]);
+  if (catsFor !== restId) return;
+  if (c.status === 'fulfilled') { cats = c.value || []; saveCats(); }
+  else if (c.reason.status !== 404 && c.reason.status !== 405) say('cat-msg', errText(c.reason), 'err');
+  if (d.status === 'fulfilled') { dishes = d.value || []; saveDishes(); }
+  renderMenu();
 }
 
 function renderMenu(){
@@ -471,7 +470,7 @@ async function openOrders(restId){
   renderOrders();
   await loadOrders(restId);
   stopOrdersPoll();
-  oPoll = setInterval(() => { if (!document.hidden) loadOrders(restId, true); }, 20000);
+  oPoll = setInterval(() => { if (!document.hidden) loadOrders(restId, true); }, 5000);
 }
 
 async function loadOrders(restId, quiet){
@@ -567,6 +566,8 @@ async function moveOrder(o, action, card){
 }
 
 $('oo-refresh').onclick = () => ordersFor && loadOrders(ordersFor);
+// новый заказ или отмена покупателем — обновляем список сразу
+document.addEventListener('pass:notifications', () => { if (oPoll && ordersFor) loadOrders(ordersFor, true); });
 
 $('cat-new').onclick = openCategory;
 $('dish-new').onclick = () => openDish(null);
