@@ -22,11 +22,13 @@ export class ApiError extends Error {
 }
 
 async function api(method, path, body){
-  const headers = { 'Content-Type': 'application/json' };
+  // FormData (загрузка фото) браузер кодирует сам и сам ставит Content-Type с границей multipart
+  const form = body instanceof FormData;
+  const headers = form ? {} : { 'Content-Type': 'application/json' };
   if (session.token) headers.Authorization = 'Bearer ' + session.token;
   let res;
   try {
-    res = await fetch(session.base + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    res = await fetch(session.base + path, { method, headers, body: form ? body : body ? JSON.stringify(body) : undefined });
   } catch {
     throw new ApiError(0, { message: 'Нет связи с сервером ' + session.base + ' (проверьте, что бэкенд запущен и включён CORS)' });
   }
@@ -38,6 +40,8 @@ async function api(method, path, body){
   }
   return data;
 }
+
+function photoForm(blob){ const f = new FormData(); f.append('photo', blob, 'photo.jpg'); return f; }
 
 export const Api = {
   register:   (b)  => api('POST',   '/auth/register', b),
@@ -96,6 +100,8 @@ export const Api = {
   addDish:     (restId, b) => api('POST', '/internal/restaurants/' + restId + '/dishes', b),
   updateDish:  (dishId, b) => api('PATCH', '/internal/dishes/' + dishId, b),
   hideDish:    (dishId)    => api('DELETE', '/internal/dishes/' + dishId),
+  uploadRestaurantPhoto: (restId, blob) => api('POST', '/internal/restaurants/' + restId + '/photo', photoForm(blob)),
+  uploadDishPhoto:       (dishId, blob) => api('POST', '/internal/dishes/' + dishId + '/photo', photoForm(blob)),
 
   // заказы (фича orders)
   setOrderStatus:   (orderId, status) => api('PATCH', '/internal/orders/' + orderId + '/status', { status }),

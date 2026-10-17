@@ -1,6 +1,6 @@
 /* PassDelivery — кабинет владельца ресторана (макет 09-restaurant-owner, node 37:1859) */
 import { Api, store } from './api.js';
-import { $, say, busy, errText, initials, price } from './ui.js';
+import { $, say, busy, errText, initials, price, paintPhoto, shrinkPhoto } from './ui.js';
 import { ratingSummary, renderReviewList } from './reviews.js';
 
 export const OWNER_TABS = ['overview', 'menu', 'orders', 'reviews', 'settings'];
@@ -60,6 +60,7 @@ function show(tab){
 function renderSide(){
   const r = current();
   $('o-avatar').textContent = r ? initials(r.name) : '+';
+  paintPhoto($('o-avatar'), r?.photo_url, null);
   $('o-name').textContent = r ? r.name : 'Нет ресторана';
   $('o-status').textContent = r ? (r.is_open ? 'Онлайн' : 'Закрыт') : 'Создайте первый';
   $('o-dot').hidden = !r;
@@ -112,6 +113,7 @@ function fillForm(r){
   $('rs-address').value = r?.address || '';
   $('rs-phone').value = r?.phone || '';
   $('rs-open').checked = r ? !!r.is_open : true;
+  resetPhoto('rs', r?.photo_url);
   $('rs-save').textContent = r ? 'Сохранить' : 'Создать ресторан';
   $('rs-cancel').hidden = !(creating && list.length);
   say('rs-msg', '');
@@ -143,7 +145,7 @@ async function saveForm(ev){
     // PATCH: только изменённые поля; очищенные описание и телефон уходят пустой строкой
     body = {};
     for (const k of Object.keys(v)) if (v[k] !== (r[k] ?? (k === 'is_open' ? false : ''))) body[k] = v[k];
-    if (!Object.keys(body).length) return say('rs-msg', 'Нет изменений');
+    if (!Object.keys(body).length && !photos.rs) return say('rs-msg', 'Нет изменений');
   } else {
     body = { name: v.name, address: v.address, is_open: v.is_open };
     if (v.description) body.description = v.description;
@@ -153,11 +155,17 @@ async function saveForm(ev){
   const btn = $('rs-save'); busy(btn, true); say('rs-msg', '');
   try {
     if (r) {
-      replace(await Api.updateRestaurant(r.id, body));
+      if (Object.keys(body).length) replace(await Api.updateRestaurant(r.id, body));
+      if (photos.rs) replace(await Api.uploadRestaurantPhoto(r.id, photos.rs));
       show('settings');
       say('rs-msg', 'Сохранено', 'ok');
     } else {
-      const created = await Api.createRestaurant(body);
+      let created = await Api.createRestaurant(body);
+      if (photos.rs) {
+        // ресторан уже создан — если фото не загрузилось, не теряем его, а сообщаем на экране обзора
+        try { created = await Api.uploadRestaurantPhoto(created.id, photos.rs); }
+        catch (e) { say('owner-msg', 'Ресторан создан, но фото не загрузилось: ' + errText(e), 'err'); }
+      }
       list = [...list, created]; saveCache();
       select(created.id);
       creating = false;
@@ -259,6 +267,7 @@ function renderDishes(sorted, active){
     const main = document.createElement('div'); main.className = 'dish__main';
     const thumb = document.createElement('span'); thumb.className = 'dish__thumb'; thumb.setAttribute('aria-hidden', 'true');
     thumb.textContent = (d.name || '·')[0].toUpperCase();
+    paintPhoto(thumb, d.photo_url, null);
     const info = document.createElement('div'); info.style.minWidth = '0';
     const name = document.createElement('div'); name.className = 'dish__name'; name.textContent = d.name;
     info.append(name);
@@ -306,6 +315,7 @@ function openDish(d){
   $('d-price').value = d ? rublesText(d.price_kopecks) : '';
   $('d-time').value = d?.cooking_time_minutes || '';
   $('d-available').checked = d ? !!d.is_available : true;
+  resetPhoto('d', d?.photo_url);
   $('dish-form-title').textContent = d ? 'Изменить блюдо' : 'Новое блюдо';
   $('dish-save').textContent = d ? 'Сохранить' : 'Добавить блюдо';
   say('dish-form-msg', '');
@@ -342,7 +352,7 @@ async function saveDish(ev){
     // PATCH: только изменённые поля; очищенные описание и время уходят как null
     body = {};
     for (const k of Object.keys(v)) if (v[k] !== (was[k] ?? null)) body[k] = v[k];
-    if (!Object.keys(body).length) return $('dish-dialog').close();
+    if (!Object.keys(body).length && !photos.d) return $('dish-dialog').close();
   } else {
     body = { category_id, name, price_kopecks: v.price_kopecks, is_available: v.is_available };
     if (v.description) body.description = v.description;
@@ -352,8 +362,17 @@ async function saveDish(ev){
   const r = current(); if (!r) return;
   const btn = $('dish-save'); busy(btn, true); say('dish-form-msg', '');
   try {
-    const saved = was ? await Api.updateDish(was.id, body) : await Api.addDish(r.id, body);
+    let saved = !was ? await Api.addDish(r.id, body) : Object.keys(body).length ? await Api.updateDish(was.id, body) : was;
     if (catsFor === r.id) { putDish(saved); }
+    if (photos.d) {
+      try { saved = await Api.uploadDishPhoto(saved.id, photos.d); if (catsFor === r.id) putDish(saved); }
+      catch (e) {
+        // блюдо уже сохранено — оставляем диалог открытым как «редактирование», чтобы можно было повторить загрузку фото
+        editingDish = saved; $('dish-form-title').textContent = 'Изменить блюдо'; $('dish-save').textContent = 'Сохранить';
+        renderMenu();
+        return say('dish-form-msg', 'Блюдо сохранено, но фото не загрузилось: ' + errText(e), 'err');
+      }
+    }
     $('dish-dialog').close();
     renderMenu();
     say('cat-msg', 'Блюдо «' + saved.name + '» ' + (was ? 'сохранено' : 'добавлено'), 'ok');
@@ -361,6 +380,40 @@ async function saveDish(ev){
     say('dish-form-msg', dishErr(e, was ? 'изменять' : 'добавлять'), 'err');
     if (was && e.status === 404 && e.body) dropDish(was.id);
   } finally { busy(btn, false); }
+}
+
+/* ---------- фото: выбор файла, превью, отправка вместе с формой ---------- */
+const photos = { rs: null, d: null };   // уменьшенное фото, выбранное в форме ресторана / блюда, ещё не отправленное
+const PHOTO_HINT = 'JPG, PNG или WebP. Большие фото уменьшим сами';
+
+function resetPhoto(prefix, url){
+  photos[prefix] = null;
+  $(prefix + '-photo').value = '';
+  $(prefix + '-photo-hint').textContent = PHOTO_HINT; $(prefix + '-photo-hint').classList.remove('err');
+  dropPreview(prefix);
+  paintPhoto($(prefix + '-photo-preview'), url, null);
+}
+
+const previews = { rs: null, d: null };   // object URL превью выбранного файла — освобождаем, когда он больше не нужен
+function dropPreview(prefix){ if (previews[prefix]) URL.revokeObjectURL(previews[prefix]); previews[prefix] = null; }
+
+async function pickPhoto(prefix){
+  const file = $(prefix + '-photo').files[0];
+  if (!file) return;
+  const hint = $(prefix + '-photo-hint'); hint.classList.remove('err'); hint.textContent = 'Обрабатываем фото…';
+  try {
+    photos[prefix] = await shrinkPhoto(file);
+    const preview = $(prefix + '-photo-preview');
+    dropPreview(prefix);
+    previews[prefix] = URL.createObjectURL(photos[prefix]);
+    preview.dataset.photo = '';
+    preview.style.background = 'center / cover no-repeat url("' + previews[prefix] + '")';
+    preview.classList.add('has-photo');
+    hint.textContent = 'Фото сохранится вместе с формой';
+  } catch (e) {
+    photos[prefix] = null;
+    hint.textContent = e.message; hint.classList.add('err');
+  }
 }
 
 function putDish(d){
@@ -572,6 +625,8 @@ document.addEventListener('pass:notifications', () => { if (oPoll && ordersFor) 
 $('cat-new').onclick = openCategory;
 $('dish-new').onclick = () => openDish(null);
 $('dish-form').onsubmit = saveDish;
+$('d-photo').onchange = () => pickPhoto('d');
+$('rs-photo').onchange = () => pickPhoto('rs');
 $('dish-cancel').onclick = () => $('dish-dialog').close();
 $('dish-dialog').addEventListener('close', () => { editingDish = null; });
 $('cat-form').onsubmit = saveCategory;

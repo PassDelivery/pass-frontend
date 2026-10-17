@@ -1,7 +1,7 @@
 /* PassDelivery — каталог ресторанов и меню для покупателя
    (макеты 02-restaurants, node 37:1258, и 03-restaurant-menu, node 37:1340) */
 import { Api } from './api.js';
-import { $, say, busy, errText, initials, price, placeholderBg, showPage } from './ui.js';
+import { $, say, busy, errText, initials, price, paintPhoto, showPage } from './ui.js';
 import { getCart, itemOf, addDish, stepper, onCartChange, cartError } from './cart.js';
 import { ratingSummary, renderReviewList } from './reviews.js';
 
@@ -47,7 +47,7 @@ function renderCatalog(){
     card.className = 'rest-card'; card.href = '#/restaurants/' + r.id;
 
     const img = document.createElement('div'); img.className = 'rest-card__img';
-    img.style.background = placeholderBg(r.id);
+    paintPhoto(img, r.photo_url, r.id);
     const mark = document.createElement('span'); mark.textContent = initials(r.name); mark.setAttribute('aria-hidden', 'true');
     img.append(mark);
 
@@ -74,7 +74,7 @@ export async function openRestaurant(id){
     $('r-closed').hidden = true; $('r-cats').textContent = ''; $('r-menu').textContent = ''; $('r-empty').hidden = true;
     lastMenu = null; renderCartPill();
     $('r-reviews').hidden = true; $('r-rv-list').textContent = '';
-    $('r-hero').style.background = placeholderBg(id);
+    paintPhoto($('r-hero'), null, id);
     window.scrollTo(0, 0);
   }
   say('r-msg', '');
@@ -82,6 +82,7 @@ export async function openRestaurant(id){
     const [r, menu] = await Promise.all([Api.restaurant(id), Api.menu(id)]);
     if (openedId !== id) return;          // пока грузили, пользователь ушёл на другой ресторан
     renderHero(r);
+    paintPhoto($('r-hero'), r.photo_url, id);
     renderMenu(menu);
     loadReviews(r);
   } catch (e) {
@@ -184,7 +185,7 @@ function dishCard(d){
   const card = document.createElement('article'); card.className = 'dish-card';
 
   const img = document.createElement('div'); img.className = 'dish-card__img';
-  img.style.background = placeholderBg(d.id);
+  paintPhoto(img, d.photo_url, d.id);
   const mark = document.createElement('span'); mark.textContent = (d.name || '·')[0].toUpperCase(); mark.setAttribute('aria-hidden', 'true');
   img.append(mark);
 
