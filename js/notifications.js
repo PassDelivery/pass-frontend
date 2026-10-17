@@ -8,6 +8,7 @@ let role = null;
 let items = [];
 let poll = null;
 let anchor = null;
+let seen = null;          // id уже полученных уведомлений; null — первая загрузка
 
 export function startNotifications(userRole){
   role = userRole;
@@ -17,13 +18,17 @@ export function startNotifications(userRole){
 }
 
 export function stopNotifications(){
-  clearInterval(poll); poll = null; role = null; items = [];
+  clearInterval(poll); poll = null; role = null; items = []; seen = null;
   close(); renderCount();
 }
 
 async function load(){
   try { items = (await Api.notifications()) || []; }
   catch { return; }                       // нет ручки или сети — колокольчик просто молчит
+  // о новых уведомлениях сообщаем экранам: они сразу перезапрашивают свои данные, не дожидаясь своего опроса
+  const fresh = seen ? items.filter(n => !seen.has(n.id)) : [];
+  seen = new Set(items.map(n => n.id));
+  if (fresh.length) document.dispatchEvent(new CustomEvent('pass:notifications', { detail: fresh }));
   renderCount();
   if (!$('notif-panel').hidden) renderList();
 }

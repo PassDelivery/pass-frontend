@@ -309,3 +309,4 @@ async function toggleOnline(){
 $('k-switch').onclick = toggleOnline;
 $('k-refresh').onclick = () => { load(); loadStats(); };
 document.querySelectorAll('[data-ktab]').forEach(b => { b.onclick = () => { tab = b.dataset.ktab; render(); }; });
+document.addEventListener('pass:notifications', () => { if (poll) load(true); });

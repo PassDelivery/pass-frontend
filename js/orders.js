@@ -334,3 +334,7 @@ async function markUnrated(orders){
 $('co-form').onsubmit = submitCheckout;
 $('ord-cancel').onclick = cancelOpened;
 $('rv-form').onsubmit = submitReview;
+// ресторан или курьер сменили статус открытого заказа — обновляем страницу сразу
+document.addEventListener('pass:notifications', (e) => {
+  if (openedOrder && e.detail.some(n => n.order_id === openedOrder)) refreshOrder(openedOrder, true);
+});

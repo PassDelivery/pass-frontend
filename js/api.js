@@ -91,6 +91,7 @@ export const Api = {
   createRestaurant: (b)     => api('POST',  '/internal/restaurants', b),
   updateRestaurant: (id, b) => api('PATCH', '/internal/restaurants/' + id, b),
   categories:  (restId)    => api('GET',  '/internal/restaurants/' + restId + '/categories'),
+  ownerDishes: (restId)    => api('GET',  '/internal/restaurants/' + restId + '/dishes'),
   addCategory: (restId, b) => api('POST', '/internal/restaurants/' + restId + '/categories', b),
   addDish:     (restId, b) => api('POST', '/internal/restaurants/' + restId + '/dishes', b),
   updateDish:  (dishId, b) => api('PATCH', '/internal/dishes/' + dishId, b),
