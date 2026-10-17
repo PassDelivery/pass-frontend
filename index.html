@@ -374,6 +374,15 @@
           <label for="rs-desc">Описание</label><textarea id="rs-desc" rows="3" maxlength="100" placeholder="Итальянская кухня, свежая паста каждый день"></textarea>
           <label for="rs-address">Адрес *</label><input id="rs-address" placeholder="Москва, ул. Ленина, 12">
           <label for="rs-phone">Телефон</label><input id="rs-phone" type="tel" placeholder="+79991234567">
+          <label for="rs-photo">Фото</label>
+          <div class="photo-field">
+            <span class="photo-field__preview" id="rs-photo-preview" aria-hidden="true"></span>
+            <div class="photo-field__side">
+              <label class="btn-outline btn-outline--sm photo-field__btn" for="rs-photo">Выбрать фото</label>
+              <input type="file" id="rs-photo" accept="image/*" hidden>
+              <small class="photo-field__hint" id="rs-photo-hint">JPG, PNG или WebP. Большие фото уменьшим сами</small>
+            </div>
+          </div>
           <label class="check"><input type="checkbox" id="rs-open"> Ресторан открыт и принимает заказы</label>
           <div class="msg" id="rs-msg" role="status"></div>
           <div class="actions">
@@ -492,6 +501,15 @@
     <div class="row">
       <div><label for="d-price">Цена, ₽ *</label><input id="d-price" inputmode="decimal" autocomplete="off" placeholder="540"></div>
       <div><label for="d-time">Время готовки, мин</label><input id="d-time" type="number" min="1" step="1" inputmode="numeric" placeholder="15"></div>
+    </div>
+    <label for="d-photo">Фото</label>
+    <div class="photo-field">
+      <span class="photo-field__preview" id="d-photo-preview" aria-hidden="true"></span>
+      <div class="photo-field__side">
+        <label class="btn-outline btn-outline--sm photo-field__btn" for="d-photo">Выбрать фото</label>
+        <input type="file" id="d-photo" accept="image/*" hidden>
+        <small class="photo-field__hint" id="d-photo-hint">JPG, PNG или WebP. Большие фото уменьшим сами</small>
+      </div>
     </div>
     <label class="check"><input type="checkbox" id="d-available" checked> В продаже — блюдо видно покупателям</label>
     <div class="msg" id="dish-form-msg" role="status"></div>

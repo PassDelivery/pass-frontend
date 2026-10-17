@@ -1,7 +1,7 @@
 /* PassDelivery — корзина покупателя (макет 04-cart, node 37:1449)
    Корзину целиком отдаёт бэк после каждого изменения — здесь только держим её и перерисовываем */
 import { Api } from './api.js';
-import { $, say, busy, errText, price, placeholderBg, showPage } from './ui.js';
+import { $, say, busy, errText, price, paintPhoto, showPage } from './ui.js';
 
 const EMPTY = { restaurant_id: null, restaurant_name: null, items: [], total_kopecks: 0 };
 
@@ -110,7 +110,7 @@ function row(item){
   el.className = 'cart-row' + (item.is_available ? '' : ' cart-row--off');
 
   const thumb = document.createElement('span'); thumb.className = 'cart-row__thumb';
-  thumb.style.background = placeholderBg(item.dish_id);
+  paintPhoto(thumb, item.photo_url, item.dish_id);
   thumb.textContent = (item.name || '·')[0].toUpperCase(); thumb.setAttribute('aria-hidden', 'true');
 
   const info = document.createElement('div'); info.className = 'cart-row__info';
